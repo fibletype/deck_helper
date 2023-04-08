@@ -11,14 +11,14 @@ pub enum DeckType {
 }
 
 impl FromStr for DeckType {
-    type Err = String;
+    type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
             "aggro" => Ok(DeckType::Aggro),
             "midrange" => Ok(DeckType::Midrange),
             "control" => Ok(DeckType::Control),
-            _ => panic!("Wrong deck type"),
+            _ => Err("Wrong deck type"),
         }
     }
 }
@@ -80,31 +80,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_to_deck_type_0() {
-        assert_eq!(DeckType::from_str("AgGro").unwrap(), DeckType::Aggro);   
+    fn parse_deck_type() {
+        assert_eq!(DeckType::from_str("AgGro"), Ok(DeckType::Aggro));
+        assert_eq!(DeckType::from_str("MiDraNge"), Ok(DeckType::Midrange));
+        assert_eq!(DeckType::from_str("ContRol"), Ok(DeckType::Control));
     }
 
     #[test]
-    fn test_to_deck_type_1() {
-        assert_eq!(DeckType::from_str("MiDraNge").unwrap(), DeckType::Midrange);   
-    }
-
-    #[test]
-    fn test_to_deck_type_3() {
-        assert_eq!(DeckType::from_str("ContRol").unwrap(), DeckType::Control);   
+    fn parse_deck_type_wrong() {
+        assert!(DeckType::from_str("wrong").is_err());
     }
 
     #[test]
     fn test_to_deck_0() {
         assert_eq!(str_to_deck("4 Card_name 3".to_string()), [Card {num: 4 ,
                                                                    name: "Card_name".to_string(),
-                                                                   cmc:  3,}]);   
+                                                                   cmc:  3,}]);
     }
 
     #[test]
     fn test_to_deck_1() {
         assert_eq!(str_to_deck("4 Card name 3".to_string()), [Card {num: 4 ,
                                                                    name: "Card name".to_string(),
-                                                                   cmc:  3,}]);   
+                                                                   cmc:  3,}]);
     }
 }
