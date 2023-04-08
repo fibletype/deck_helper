@@ -41,8 +41,8 @@ pub struct Deck {
 }
 
 impl Deck {
-  pub const fn new(card_list : Vec<Card>, deck_type: DeckType) -> Self {
-      Deck {cards : card_list, deck_type}
+  pub const fn new(cards : Vec<Card>, deck_type: DeckType) -> Self {
+      Deck {cards, deck_type}
   }
 }
 /* TODO how to use resulting */
@@ -66,10 +66,7 @@ fn str_to_deck (str : String) -> Vec<Card> {
       let num : u8 = items[0].parse().unwrap();
       let cmc : u8 = items.last().unwrap().parse().unwrap();
       let name: String = items[1..(items.len() - 1)].join(" ");
-      deck.push(Card {num:  num,
-                      name: name,
-                      cmc:  cmc,
-               })
+      deck.push(Card {num, name, cmc})
   }
   deck
 }
