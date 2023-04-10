@@ -15,7 +15,6 @@ pub struct Args {
     #[arg(short, long)]
     pub turn: u8,
     ///Your deck type
-	 // TODO: Maybe we should make it optional or with default value?
     #[arg(long="type")]
     pub deck_type: DeckType,
 }

@@ -1,7 +1,9 @@
+use core::time;
 use std::path::Path;
 use std::str::FromStr;
 use std::fs::File;
 use std::io::prelude::*;
+use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum DeckType {
@@ -23,14 +25,18 @@ impl FromStr for DeckType {
     }
 }
 
+
+#[derive (Debug, Deserialize, PartialEq)]
+pub struct SkyfallCard {
+    name : String,
+    cmc : f32, 
+}
 #[derive(Debug, PartialEq)]
 pub struct Card {
     /// numbers of card
     num: u8,
     /// Card name
-    name: String,
-    ///need to rework to pub struct
-    cmc : u8, 
+    card : SkyfallCard,
 }
 
 
@@ -45,30 +51,36 @@ impl Deck {
       Deck {cards, deck_type}
   }
 }
-/* TODO how to use resulting */
-pub fn file_to_cards(f: &Path) -> Vec<Card> {
+
+pub fn file_to_cards(f: &Path) -> Result<Vec<Card>> {
   let deck_list = File::open(f);
   let mut contents = String::new();
   if let Ok(mut f) = deck_list {
-      match f.read_to_string(&mut contents) {
-          Ok(_b) => str_to_deck(contents),
-          _             => panic!("some strange error =)"),
-          }
+    f.read_to_string(&mut contents).map_err(|err| format!("ERR: {err}"))?;
+    str_to_deck(contents)
   } else {
-      panic!("deck list doesn't exists in file system")
+      Err("deck list doesn't exists in file system".into())
   }
 }
 
-fn str_to_deck (str : String) -> Vec<Card> {
+type Result<T, E = Box<dyn std::error::Error>> = std::result::Result<T, E>;
+
+fn str_to_deck (str : String) -> Result<Vec<Card>> {
   let mut deck = Vec::new();
   for i in str.lines().into_iter() {
       let items : Vec <_>  = i.split_whitespace().collect();
       let num : u8 = items[0].parse().unwrap();
-      let cmc : u8 = items.last().unwrap().parse().unwrap();
-      let name: String = items[1..(items.len() - 1)].join(" ");
-      deck.push(Card {num, name, cmc})
+      let name = items[1..items.len()].join(" ");
+      let response = reqwest::blocking::get( "https://api.scryfall.com/cards/named?exact=".to_owned() + &name).unwrap();
+      if response.status() == 200 {
+        let resp: SkyfallCard = response.json().unwrap();
+        deck.push(Card {num, card : resp});
+      } else { 
+        println!("Card \"{}\" doesn't exists, please amend name\n", name)
+      }
+      std::thread::sleep(time::Duration::from_millis(100));
   }
-  deck
+  Ok(deck)
 }
 
 
@@ -90,15 +102,11 @@ mod tests {
 
     #[test]
     fn test_to_deck_0() {
-        assert_eq!(str_to_deck("4 Card_name 3".to_string()), [Card {num: 4 ,
-                                                                   name: "Card_name".to_string(),
-                                                                   cmc:  3,}]);
-    }
-
-    #[test]
-    fn test_to_deck_1() {
-        assert_eq!(str_to_deck("4 Card name 3".to_string()), [Card {num: 4 ,
-                                                                   name: "Card name".to_string(),
-                                                                   cmc:  3,}]);
+        assert_eq!(str_to_deck("4 Damnation".to_string()).unwrap(), vec![Card {num: 4 ,
+                                                                           card :
+                                                                           (SkyfallCard {name: "Damnation".to_string(), cmc:  4.0,})}]);
+        assert_eq!(str_to_deck("4 Wrath of God".to_string()).unwrap(), vec![Card {num: 4 ,
+                                                                           card :
+                                                                           (SkyfallCard {name: "Wrath of God".to_string(), cmc:  4.0,})}]);                                                                           
     }
 }
