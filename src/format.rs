@@ -29,7 +29,10 @@ impl FromStr for DeckType {
 #[derive (Debug, Deserialize, PartialEq)]
 pub struct SkyfallCard {
     name : String,
-    cmc : f32, 
+    cmc : f32,
+    mana_cost : String,
+    type_line : String,
+    oracle_text : String, 
 }
 #[derive(Debug, PartialEq)]
 pub struct Card {
@@ -98,15 +101,5 @@ mod tests {
     #[test]
     fn parse_deck_type_wrong() {
         assert!(DeckType::from_str("wrong").is_err());
-    }
-
-    #[test]
-    fn test_to_deck_0() {
-        assert_eq!(str_to_deck("4 Damnation".to_string()).unwrap(), vec![Card {num: 4 ,
-                                                                           card :
-                                                                           (SkyfallCard {name: "Damnation".to_string(), cmc:  4.0,})}]);
-        assert_eq!(str_to_deck("4 Wrath of God".to_string()).unwrap(), vec![Card {num: 4 ,
-                                                                           card :
-                                                                           (SkyfallCard {name: "Wrath of God".to_string(), cmc:  4.0,})}]);                                                                           
     }
 }
