@@ -3,13 +3,14 @@ use std::path::Path;
 use std::str::FromStr;
 use std::fs::File;
 use std::io::prelude::*;
+use std::vec;
 use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum DeckType {
-    Aggro,
-    Midrange,
-    Control,
+    Commander,
+    Modern,
+    Draft,
 }
 
 impl FromStr for DeckType {
@@ -17,9 +18,9 @@ impl FromStr for DeckType {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "aggro" => Ok(DeckType::Aggro),
-            "midrange" => Ok(DeckType::Midrange),
-            "control" => Ok(DeckType::Control),
+            "commander" => Ok(DeckType::Commander),
+            "modern" => Ok(DeckType::Modern),
+            "draft" => Ok(DeckType::Draft),
             _ => Err("Wrong deck type"),
         }
     }
@@ -31,6 +32,7 @@ pub struct SkyfallCard {
     name : String,
     cmc : f32,
     mana_cost : String,
+    colors : Vec<String>,
     type_line : String,
     oracle_text : String, 
 }
@@ -45,14 +47,45 @@ pub struct Card {
 
 pub struct Deck {
   ///
-  cards: Vec<Card>,
-  deck_type: DeckType,
+  pub cards: Vec<Card>,
+  pub deck_type: DeckType,
 }
 
 impl Deck {
   pub const fn new(cards : Vec<Card>, deck_type: DeckType) -> Self {
       Deck {cards, deck_type}
   }
+
+  pub fn number_of_cards (self) -> u8 {
+    let mut buf = 0;
+    for i in self.cards {
+      buf += i.num;
+    }
+    buf
+  }
+
+  pub fn number_of_card_type (self, card_type : &str) -> u8 {
+    let mut buf = 0;
+    for i in self.cards {
+      if i.card.type_line.contains(card_type) {
+        buf += i.num;
+      }
+    }
+    buf
+  }
+
+  pub fn deck_colors (self) -> Vec<String> {
+    let mut buf = Vec::new();
+    for i in self.cards {
+      for j in i.card.colors {
+        if !buf.contains(&j) {
+          buf.push(j);
+        }
+      }
+    }
+    buf
+  }
+
 }
 
 pub fn file_to_cards(f: &Path) -> Result<Vec<Card>> {
@@ -93,9 +126,9 @@ mod tests {
 
     #[test]
     fn parse_deck_type() {
-        assert_eq!(DeckType::from_str("AgGro"), Ok(DeckType::Aggro));
-        assert_eq!(DeckType::from_str("MiDraNge"), Ok(DeckType::Midrange));
-        assert_eq!(DeckType::from_str("ContRol"), Ok(DeckType::Control));
+        assert_eq!(DeckType::from_str("coMmAnder"), Ok(DeckType::Commander));
+        assert_eq!(DeckType::from_str("modErn"), Ok(DeckType::Modern));
+        assert_eq!(DeckType::from_str("DraFt"), Ok(DeckType::Draft));
     }
 
     #[test]
