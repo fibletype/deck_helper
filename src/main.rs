@@ -5,6 +5,10 @@ use configure::*;
 
 
 fn main() {
-    let args = Args::parse();
-    let _deck = Deck::new(file_to_cards(&args.deck).unwrap(), args.deck_type);
+    // let args = Args::parse();
+    // let deck = Deck::new(file_to_cards(&args.deck).unwrap(), args.deck_type);
+    let response = reqwest::blocking::get( "https://api.scryfall.com/cards/named?exact=Raugrin Triome").unwrap();
+    let resp: SkyfallCard = response.json().unwrap();
+    println!("{:?}", resp);
+      
 }

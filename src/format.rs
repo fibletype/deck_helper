@@ -67,7 +67,17 @@ impl Deck {
   pub fn number_of_card_type (self, card_type : &str) -> u8 {
     let mut buf = 0;
     for i in self.cards {
-      if i.card.type_line.contains(card_type) {
+      if i.card.type_line.to_lowercase().contains(card_type) {
+        buf += i.num;
+      }
+    }
+    buf
+  }
+
+  pub fn number_of_card_oracle (self, text : &str) -> u8 {
+    let mut buf = 0;
+    for i in self.cards {
+      if i.card.oracle_text.to_lowercase().contains(text) {
         buf += i.num;
       }
     }
