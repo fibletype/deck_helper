@@ -56,17 +56,17 @@ impl Deck {
       Deck {cards, deck_type}
   }
 
-  pub fn number_of_cards (self) -> u8 {
+  pub fn number_of_cards (&self) -> u8 {
     let mut buf = 0;
-    for i in self.cards {
+    for i in &self.cards {
       buf += i.num;
     }
     buf
   }
 
-  pub fn number_of_card_type (self, card_type : &str) -> u8 {
+  pub fn number_of_card_type (&self, card_type : &str) -> u8 {
     let mut buf = 0;
-    for i in self.cards {
+    for i in &self.cards {
       if i.card.type_line.to_lowercase().contains(card_type) {
         buf += i.num;
       }
@@ -74,22 +74,22 @@ impl Deck {
     buf
   }
 
-  pub fn number_of_card_oracle (self, text : &str) -> u8 {
+  pub fn number_of_card_oracle (&self, text : String) -> u8 {
     let mut buf = 0;
-    for i in self.cards {
-      if i.card.oracle_text.to_lowercase().contains(text) {
+    for i in &self.cards {
+      if i.card.oracle_text.to_lowercase().contains(text.as_str()) {
         buf += i.num;
       }
     }
     buf
   }
 
-  pub fn deck_colors (self) -> Vec<String> {
+  pub fn deck_colors (&self) -> Vec<String> {
     let mut buf = Vec::new();
-    for i in self.cards {
-      for j in i.card.colors {
-        if !buf.contains(&j) {
-          buf.push(j);
+    for i in &self.cards {
+      for j in &i.card.colors {
+        if !buf.contains(j) {
+          buf.push(j.to_string());
         }
       }
     }

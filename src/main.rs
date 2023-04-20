@@ -2,6 +2,8 @@ mod format;
 use format::*;
 mod configure;
 use configure::*;
+mod logic;
+use logic::lands;
 
 
 fn main() {
